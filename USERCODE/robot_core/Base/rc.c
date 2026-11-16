@@ -36,6 +36,7 @@ extern UART_HandleTypeDef VT_RC_UART_HANDLE;
 RAM_PERSIST static rc_ctrl_t rc_ctrl_data;
 RAM_PERSIST rc_ctrl_t vt_data;
 RAM_PERSIST rc_ctrl_t dt7_data;
+RAM_PERSIST ht10a_ctrl_t ht10a_data;
 // RAM_PERSIST static uint8_t dt7_rc_rx_lost = RC_RX_LOST_MAX;
 RAM_PERSIST uint8_t dt7_rc_rx_lost = RC_RX_LOST_MAX;
 
@@ -50,48 +51,70 @@ extern UART_HandleTypeDef RC_UART_HANDLE;
  * @return error code, err=0 no error, err!=0 with specific error
  * @attention  must ensure that the buffer len is larger than RC_FRAME_LENGTH
  */
-static uint8_t parse_rc_data(uint8_t *pData) {
-  dt7_data.rc.ch0 =
-      (int16_t)((int16_t)pData[0] | ((int16_t)pData[1] << 8)) & 0x07FF;
-  if (dt7_data.rc.ch0 > RC_CH_VALUE_MAX || dt7_data.rc.ch0 < RC_CH_VALUE_MIN)
-    return RC_CH_ERROR;
-  dt7_data.rc.ch0 -= RC_CH_VALUE_OFFSET;
+//static uint8_t parse_rc_data(uint8_t *pData) {
+//  dt7_data.rc.ch0 =
+//      (int16_t)((int16_t)pData[0] | ((int16_t)pData[1] << 8)) & 0x07FF;
+//  if (dt7_data.rc.ch0 > RC_CH_VALUE_MAX || dt7_data.rc.ch0 < RC_CH_VALUE_MIN)
+//    return RC_CH_ERROR;
+//  dt7_data.rc.ch0 -= RC_CH_VALUE_OFFSET;
 
-  dt7_data.rc.ch1 =
-      (int16_t)(((int16_t)pData[1] >> 3) | ((int16_t)pData[2] << 5)) & 0x07FF;
-  if (dt7_data.rc.ch1 > RC_CH_VALUE_MAX || dt7_data.rc.ch1 < RC_CH_VALUE_MIN)
-    return RC_CH_ERROR;
-  dt7_data.rc.ch1 -= RC_CH_VALUE_OFFSET;
+//  dt7_data.rc.ch1 =
+//      (int16_t)(((int16_t)pData[1] >> 3) | ((int16_t)pData[2] << 5)) & 0x07FF;
+//  if (dt7_data.rc.ch1 > RC_CH_VALUE_MAX || dt7_data.rc.ch1 < RC_CH_VALUE_MIN)
+//    return RC_CH_ERROR;
+//  dt7_data.rc.ch1 -= RC_CH_VALUE_OFFSET;
 
-  dt7_data.rc.ch2 =
-      (int16_t)(((int16_t)pData[2] >> 6) | ((int16_t)pData[3] << 2) |
-                ((int16_t)pData[4] << 10)) &
-      0x07FF;
-  if (dt7_data.rc.ch2 > RC_CH_VALUE_MAX || dt7_data.rc.ch2 < RC_CH_VALUE_MIN)
-    return RC_CH_ERROR;
-  dt7_data.rc.ch2 -= RC_CH_VALUE_OFFSET;
+//  dt7_data.rc.ch2 =
+//      (int16_t)(((int16_t)pData[2] >> 6) | ((int16_t)pData[3] << 2) |
+//                ((int16_t)pData[4] << 10)) &
+//      0x07FF;
+//  if (dt7_data.rc.ch2 > RC_CH_VALUE_MAX || dt7_data.rc.ch2 < RC_CH_VALUE_MIN)
+//    return RC_CH_ERROR;
+//  dt7_data.rc.ch2 -= RC_CH_VALUE_OFFSET;
 
-  dt7_data.rc.ch3 =
-      (int16_t)(((int16_t)pData[4] >> 1) | ((int16_t)pData[5] << 7)) & 0x07FF;
-  if (dt7_data.rc.ch3 > RC_CH_VALUE_MAX || dt7_data.rc.ch3 < RC_CH_VALUE_MIN)
-    return RC_CH_ERROR;
-  dt7_data.rc.ch3 -= RC_CH_VALUE_OFFSET;
+//  dt7_data.rc.ch3 =
+//      (int16_t)(((int16_t)pData[4] >> 1) | ((int16_t)pData[5] << 7)) & 0x07FF;
+//  if (dt7_data.rc.ch3 > RC_CH_VALUE_MAX || dt7_data.rc.ch3 < RC_CH_VALUE_MIN)
+//    return RC_CH_ERROR;
+//  dt7_data.rc.ch3 -= RC_CH_VALUE_OFFSET;
 
-  dt7_data.rc.switch_left = (uint8_t)((uint8_t)(pData[5] >> 4) & 0x0C) >> 2;
-  dt7_data.rc.switch_right = (uint8_t)((uint8_t)(pData[5] >> 4) & 0x03);
+//  dt7_data.rc.switch_left = (uint8_t)((uint8_t)(pData[5] >> 4) & 0x0C) >> 2;
+//  dt7_data.rc.switch_right = (uint8_t)((uint8_t)(pData[5] >> 4) & 0x03);
 
-  dt7_data.mouse.x = (int16_t)((int16_t)pData[6]) | ((int16_t)pData[7] << 8);
-  dt7_data.mouse.y = (int16_t)((int16_t)pData[8]) | ((int16_t)pData[9] << 8);
-  dt7_data.mouse.z = (int16_t)((int16_t)pData[10]) | ((int16_t)pData[11] << 8);
+//  dt7_data.mouse.x = (int16_t)((int16_t)pData[6]) | ((int16_t)pData[7] << 8);
+//  dt7_data.mouse.y = (int16_t)((int16_t)pData[8]) | ((int16_t)pData[9] << 8);
+//  dt7_data.mouse.z = (int16_t)((int16_t)pData[10]) | ((int16_t)pData[11] << 8);
 
-  dt7_data.mouse.press_left = (uint8_t)pData[12];
-  dt7_data.mouse.press_right = (uint8_t)pData[13];
+//  dt7_data.mouse.press_left = (uint8_t)pData[12];
+//  dt7_data.mouse.press_right = (uint8_t)pData[13];
 
-  dt7_data.keyboard.keycode =
-      (((uint16_t)pData[14]) | ((uint16_t)pData[15] << 8));
+//  dt7_data.keyboard.keycode =
+//      (((uint16_t)pData[14]) | ((uint16_t)pData[15] << 8));
 
-  dt7_data.wheel = (int16_t)((int16_t)pData[16]) | ((int16_t)pData[17] << 8);
-  return RC_NO_ERROR;
+//  dt7_data.wheel = (int16_t)((int16_t)pData[16]) | ((int16_t)pData[17] << 8);
+//  return RC_NO_ERROR;
+//}
+
+uint8_t parse_ht10a_data(uint8_t *pData)
+{
+	ht10a_data.start = (int16_t)pData[0];
+	
+	ht10a_data.ch1  = (int16_t)((int16_t)pData[1] | ((int16_t)pData[2] << 8)) & 0x07FF;
+	ht10a_data.ch2  = (int16_t)(((int16_t)pData[2] >> 3) | ((int16_t)pData[3] << 5)) & 0x07FF;
+	ht10a_data.ch3  = (int16_t)(((int16_t)pData[3] >> 6) | ((int16_t)pData[4] << 2)| ((int16_t)pData[5] << 10)) & 0x07FF;
+	ht10a_data.ch4  = (int16_t)(((int16_t)pData[5] >> 1) | ((int16_t)pData[6] << 7)) & 0x07FF;	
+	ht10a_data.ch5  = (int16_t)(((int16_t)pData[6] >> 4) | ((int16_t)pData[7] << 4)) & 0x07FF;	
+	ht10a_data.ch6  = (int16_t)(((int16_t)pData[7] >> 7) | ((int16_t)pData[8] << 1)| ((int16_t)pData[5] << 9)) & 0x07FF;	
+	ht10a_data.ch7  = (int16_t)(((int16_t)pData[9] >> 2) | ((int16_t)pData[10] << 6)) & 0x07FF;
+	ht10a_data.ch8  = (int16_t)(((int16_t)pData[10] >> 5) | ((int16_t)pData[11] << 3)) & 0x07FF;
+	ht10a_data.ch9  = (int16_t)(((int16_t)pData[11]) | ((int16_t)pData[12] << 8)) & 0x07FF;
+	ht10a_data.ch10 = (int16_t)(((int16_t)pData[12] >> 3) | ((int16_t)pData[13] << 5)) & 0x07FF;
+  ht10a_data.ch11 = (int16_t)(((int16_t)pData[13] >> 6) | ((int16_t)pData[14] << 2)| ((int16_t)pData[15] << 10)) & 0x07FF;	
+
+	ht10a_data.flag = (int16_t)pData[23];
+	ht10a_data.flag = (int16_t)pData[24];	
+
+	return RC_NO_ERROR;
 }
 
 /**
@@ -100,7 +123,8 @@ static uint8_t parse_rc_data(uint8_t *pData) {
  */
 HAL_StatusTypeDef rc_recv_dma_init(void) {
   dt7_rc_rx_lost = RC_RX_LOST_MAX;
-  memset(&dt7_data, 0, sizeof(rc_ctrl_t));
+  //memset(&dt7_data, 0, sizeof(rc_ctrl_t));
+	memset(&ht10a_data, 0, sizeof(ht10a_ctrl_t));
 
   HAL_StatusTypeDef result = uart_recv_dma_init(
       &(RC_UART_HANDLE), rc_data_buffer, 2 * RC_FRAME_LENGTH);
@@ -159,7 +183,8 @@ void rc_uart_idle_handle(UART_HandleTypeDef *huart) {
     receive_size = (int32_t)(2 * RC_FRAME_LENGTH - uhdma->NDTR) - frame_offset;
     // 验证数据长度
     if (receive_size == RC_FRAME_LENGTH || receive_size == -RC_FRAME_LENGTH) {
-      if (!parse_rc_data(&rc_data_buffer[frame_offset])) {
+      //if (!parse_rc_data(&rc_data_buffer[frame_offset])) {
+			if (!parse_ht10a_data(&rc_data_buffer[frame_offset])) {
         // 数据正确
         dt7_rc_rx_lost = 0;
       } else
@@ -235,6 +260,10 @@ rc_ctrl_t *get_rc_data_ptr(void) {
     return &dt7_data;
   else
     return NULL;
+}
+
+ht10a_ctrl_t *get_ht10a_data_ptr(void) {
+   return &ht10a_data;
 }
 /**
  * @brief get the pointer of DT7 control data

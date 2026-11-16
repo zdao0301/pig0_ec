@@ -48,7 +48,7 @@
 #define IS_KEY_PRESS(CODE, KEY) (((CODE) & (KEY)) == (KEY))
 
 /* ------------------Data Struct Data Struct -------*/
-#define RC_FRAME_LENGTH 18
+#define RC_FRAME_LENGTH 25//18
 
 /**
  * @struct rc_ctrl_t
@@ -84,6 +84,32 @@ typedef struct {
 
   int16_t wheel;
 } rc_ctrl_t;
+
+typedef struct
+{
+	int8_t start;
+
+	int16_t ch1;			   ///< joystick channel 2 (11bit, 364-1684)
+	int16_t ch2;			   ///< joystick channel 3 (11bit, 364-1684)
+	int16_t ch3;			   ///< joystick channel 4 (11bit, 364-1684)
+	int16_t ch4;			   ///< joystick channel 1 (11bit, 364-1684)
+	int16_t ch5;			   ///< joystick channel 2 (11bit, 364-1684)
+	int16_t ch6;			   ///< joystick channel 3 (11bit, 364-1684)
+	int16_t ch7;			   ///< joystick channel 4 (11bit, 364-1684)
+	int16_t ch8;			   ///< joystick channel 1 (11bit, 364-1684)
+	int16_t ch9;			   ///< joystick channel 2 (11bit, 364-1684)
+	int16_t ch10;			   ///< joystick channel 3 (11bit, 364-1684)
+	int16_t ch11;			   ///< joystick channel 4 (11bit, 364-1684)
+	int16_t ch12;			   ///< joystick channel 1 (11bit, 364-1684)
+	int16_t ch13;			   ///< joystick channel 2 (11bit, 364-1684)
+	int16_t ch14;			   ///< joystick channel 3 (11bit, 364-1684)
+	int16_t ch15;			   ///< joystick channel 4 (11bit, 364-1684)
+	int16_t ch16;			   ///< joystick channel 4 (11bit, 364-1684)	
+	
+	int8_t flag;
+	int8_t end;
+	
+} ht10a_ctrl_t;
 
 enum key_codes {
   W = 1,
@@ -142,6 +168,8 @@ rc_ctrl_t get_rc_data(void);
 rc_ctrl_t *get_rc_data_ptr(void);
 rc_ctrl_t *get_dt7_data_ptr(void);
 rc_ctrl_t *get_vt_data_ptr(void);
+
+ht10a_ctrl_t *get_ht10a_data_ptr(void);
 
 uint32_t is_key_pressed(uint16_t key);
 uint32_t is_key_last_pressed(uint16_t key);

@@ -35,20 +35,17 @@ typedef struct {
 
 #pragma pack(1)
 typedef struct {
-  uint8_t header; // 0xA5
-  uint8_t target : 2;
-  uint8_t id_num : 3;
-  uint8_t armor_num : 3;
-  float x, y,
-      z;     // 在世界坐标系（imu的坐标系中的位置），z的值为当前瞄准装甲板的高度
-  float yaw; // 当前瞄准的装甲板朝向（在imu坐标系中的角度）
-  float vx;
-  float vy;
-  float vz;
-  float v_yaw;          // 小陀螺速度
-  float r1;             // 当前瞄准的装甲板与车身中心的水平距离
-  float r2;             // 另一侧装甲板与车身中心的水平距离
-  float dz;             // 另一侧装甲板的高度
+  uint8_t header;       // 0xA5 
+  uint8_t target : 2;   // 是否找到目标
+  uint8_t id_num : 3;   // 目标编号
+  uint8_t armor_num : 3;// 目标的装甲板数量
+  float x, y, z;        // 当前瞄准的装甲板 在世界坐标系（imu的坐标系中）的位置，z的值为高度
+  float yaw;            // 当前瞄准的装甲板 的 朝向（在imu坐标系中的角度）
+  float vx, vy, vz;     // 当前瞄准的装甲板 的 速度
+  float v_yaw;          // 目标车旋转速度
+  float r1;             // 当前瞄准的装甲板 与 目标车身中心的水平距离
+  float r2;             // 另一侧装甲板     与 目标车身中心的水平距离
+  float dz;             // 当前瞄准的装甲板 与 另一侧装甲板的高度差
   uint32_t r_timestamp; //(ms)frame capture time
   uint16_t first_phase; //(ms) speed_t offset
   uint16_t checksum;

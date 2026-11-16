@@ -22,7 +22,7 @@
 #define __STM32F4xx_IT_H
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 /* Private includes ----------------------------------------------------------*/
@@ -62,6 +62,7 @@ void TIM1_BRK_TIM9_IRQHandler(void);
 void TIM2_IRQHandler(void);
 void TIM3_IRQHandler(void);
 void I2C2_EV_IRQHandler(void);
+void SPI2_IRQHandler(void);
 void USART1_IRQHandler(void);
 void USART3_IRQHandler(void);
 void TIM8_UP_TIM13_IRQHandler(void);

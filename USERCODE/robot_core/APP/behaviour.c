@@ -97,7 +97,50 @@ static void select_rc_sc(robot_t *robot) {
 /**
  * @brief 处理机器人上下控
  */
-static void select_control_flag(rc_ctrl_t *rc_recv, robot_t *robot) {
+//static void select_control_flag(rc_ctrl_t *rc_recv, robot_t *robot) {
+//  if (robot->rc_sc == VT_CONTROLLER) { // 控制源:图传链路
+//    if (is_key_pressed(KEY_A) && is_key_pressed(KEY_S) &&
+//        is_key_pressed(KEY_Z)) {
+//      if (robot->robot_survival_flag)
+//        robot->robot_control_flag = ENABLE;
+//      else
+//        robot->robot_control_flag = DISABLE;
+//      robot->keyboard_flag = ENABLE;
+//    }
+
+//    if (is_key_pressed(KEY_E) && is_key_pressed(KEY_C) &&
+//        is_key_pressed(KEY_B)) {
+//      robot->robot_control_flag = DISABLE;
+//      robot->keyboard_flag = DISABLE;
+//    }
+//  } else if (robot->rc_sc == DT7_CONTROLLER) { // 控制源:遥控器
+//    if (rc_recv->rc.switch_right == 0 ||
+//        rc_recv->rc.switch_right == RC_SW_DOWN || is_rc_offline()) { // 断控
+//      robot->robot_control_flag = DISABLE;
+//      robot->keyboard_flag = DISABLE;
+//      if (rc_recv->rc.switch_left == RC_SW_DOWN)
+//        robot->magazine_switch_flag = MAG_OFF;
+//      else
+//        robot->magazine_switch_flag = MAG_ON;
+//    } else {
+//      if (robot->robot_survival_flag)
+//        robot->robot_control_flag = ENABLE;
+//      else
+//        robot->robot_control_flag = DISABLE;
+//#if READY_FOR_BATTLE
+//      if (is_motors_offline(GIMBAL_MOTORS)) { // 模拟云台被断电 防检录疯车
+//        robot->robot_control_flag = DISABLE;
+//      }
+//#endif
+//    }
+//  } else if (robot->rc_sc == BOARDS_CONTROLLER) { // 控制源:多板控制
+//    ; // 进到这说明本机为从机 经由多板控制 上控由主机决定
+//      /*除chassisTag外其他机构tag和flag无效化*/
+//  } else {
+//    ;
+//  }
+//}
+static void select_control_flag(ht10a_ctrl_t *rc_recv, robot_t *robot) {
   if (robot->rc_sc == VT_CONTROLLER) { // 控制源:图传链路
     if (is_key_pressed(KEY_A) && is_key_pressed(KEY_S) &&
         is_key_pressed(KEY_Z)) {
@@ -114,14 +157,16 @@ static void select_control_flag(rc_ctrl_t *rc_recv, robot_t *robot) {
       robot->keyboard_flag = DISABLE;
     }
   } else if (robot->rc_sc == DT7_CONTROLLER) { // 控制源:遥控器
-    if (rc_recv->rc.switch_right == 0 ||
-        rc_recv->rc.switch_right == RC_SW_DOWN || is_rc_offline()) { // 断控
+    if (rc_recv->ch7 == 0 ||
+        rc_recv->ch7 == 1792 || is_rc_offline()) { // 断控
       robot->robot_control_flag = DISABLE;
       robot->keyboard_flag = DISABLE;
-      if (rc_recv->rc.switch_left == RC_SW_DOWN)
-        robot->magazine_switch_flag = MAG_OFF;
-      else
-        robot->magazine_switch_flag = MAG_ON;
+					
+//      if (rc_recv->ch11 != 24) //弹舱盖
+//        robot->magazine_switch_flag = MAG_OFF;
+//      else
+//        robot->magazine_switch_flag = MAG_ON;
+			
     } else {
       if (robot->robot_survival_flag)
         robot->robot_control_flag = ENABLE;
@@ -400,106 +445,144 @@ static void update_robot_status_for_keyboard(rc_ctrl_t *rc_recv,
  * @param robot 机器人结构体指针
  * @retval None
  */
-static void update_robot_status_for_remoteControl(rc_ctrl_t *rc_recv,
+//static void update_robot_status_for_remoteControl(rc_ctrl_t *rc_recv,
+//                                                  robot_t *robot) {
+//  asr_cmds_t *asr = get_asr_cmds();
+//  // robot->magazine_switch_flag = MAG_OFF; // 遥控器下不断控关闭弹舱盖
+//  // robot->magazine_switch_flag = MAG_ON; // debug
+//  // 获取输入值
+//  rocker_rx += CLAMP((float)rc_recv->rc.ch1 * T_ACC_CNT / 660.0f - rocker_rx,
+//                     S_CURVE_RX_ACC);
+//  rocker_ry += CLAMP((float)rc_recv->rc.ch0 * T_ACC_CNT / 660.0f - rocker_ry,
+//                     S_CURVE_RY_ACC);
+//  rocker_lx = -((float)rc_recv->rc.ch3 * GAIN_RC_X / 660);
+//  rocker_ly = -((float)rc_recv->rc.ch2 * GAIN_RC_Y / 660);
+//  static bool is_switch_change = false;
+//  if (rc_recv->rc.switch_left != rc_recv->rc.last_switch_left)
+//    is_switch_change = true;
+//  else
+//    is_switch_change = false;
+//  if (robot->robot_basic_mode == NORMAL_MODE) {
+//    robot->use_supercap_flag = 0;
+//    /*  ↓↓↓左侧钮子开关控制开火↓↓↓    */
+//    if (robot->chassis_tag != C_DEFAULT_MODE)
+//      update_chassis_tag(robot, C_DEFAULT_MODE);
+
+//    if (rc_recv->rc.switch_left == RC_SW_DOWN) {
+//      robot->use_vision_flag = DISABLE;
+//      robot->fire_flag = DISABLE;
+//      robot->use_fric_flag = DISABLE;
+//      update_tag(robot, INVALID_TAG, INVALID_TAG, S_STOP_MODE);
+//      if (robot->shooter_tag != robot->shooter_tag_last && is_switch_change) {
+//        asr_shooter_stop_cmd();
+//      }
+//    } else if (rc_recv->rc.switch_left == RC_SW_MID) {
+//      robot->use_vision_flag = ENABLE; // 遥控器下打弹时自瞄常驻
+//      robot->use_fric_flag = ENABLE;
+//      update_tag(robot, INVALID_TAG, INVALID_TAG, S_RESTRICT_MODE);
+//      if (robot->shooter_tag != robot->shooter_tag_last && is_switch_change) {
+//        asr_shooter_start_cmd();
+//      }
+//#if USE_DT7_WHEEL
+//      if (abs(rc_recv->wheel - 1024) > 50) {
+//        robot->fire_flag = ENABLE;
+//      } else {
+//        robot->fire_flag = DISABLE;
+//      }
+
+//#else
+//      robot->fire_flag = DISABLE;
+//#endif
+//    } else if (rc_recv->rc.switch_left == RC_SW_UP) {
+//      robot->use_vision_flag = ENABLE; // 遥控器下打弹时自瞄常驻
+//      robot->use_fric_flag = ENABLE;
+//#if USE_DT7_WHEEL
+//      static bool restrict_lock = false;
+//      robot->use_fric_flag = ENABLE;
+//      update_tag(robot, INVALID_TAG, INVALID_TAG, S_SINGLE_MODE);
+//      if (robot->shooter_tag != robot->shooter_tag_last && is_switch_change) {
+//        asr_shooter_start_cmd();
+//      }
+//      if (abs(rc_recv->wheel - 1024) > 400) {
+//        if (!restrict_lock) {
+//          robot->fire_flag = ENABLE;
+//          restrict_lock = true;
+//        }
+//        // else robot->fire_flag = DISABLE;
+//      } else {
+//        robot->fire_flag = DISABLE;
+//        restrict_lock = false; // 解除限制
+//      }
+//#else
+//      robot->fire_flag = ENABLE;
+//#endif
+//    }
+//    /*  ↑↑↑左侧钮子开关控制开火↑↑↑    */
+//  }
+//  // ↓感觉写的有点bug
+//  else if (robot->robot_basic_mode == SEMIAUTO_MODE) {
+//    robot->use_supercap_flag = 1;
+//    robot->fire_flag = DISABLE;
+//    robot->use_fric_flag = DISABLE;
+//    if (rc_recv->rc.switch_left == RC_SW_DOWN) {
+//      update_tag(robot, C_TANK_MODE, G_DEFAULT_MODE, INVALID_TAG);
+//    } else if (rc_recv->rc.switch_left == RC_SW_MID) {
+//      // 正反陀螺供检录用
+//      if (rc_recv->rc.last_switch_left == RC_SW_DOWN)
+//        spin_direction = -spin_direction;
+//      update_tag(robot, C_SPIN_MODE, G_MANUAL_MODE, INVALID_TAG);
+//    } else if (rc_recv->rc.switch_left == RC_SW_UP) {
+//      // 此处根据导航提供的数据更新TAG
+//      nav_ctrl_t *nav = get_nav_ctrl_data_ptr();
+//      if (!nav->header) {
+//        // 导航掉线
+//        update_tag(robot, C_SPIN_MODE, G_PATROL_MODE, S_STOP_MODE);
+//      } else {
+//        // TODO
+//      }
+//    }
+//  } else if (robot->robot_basic_mode == AUTO_MODE) {
+//    // 全自动模式
+//    // 格了
+//  }
+//}
+static void update_robot_status_for_ht10a(ht10a_ctrl_t *rc_recv,
                                                   robot_t *robot) {
-  asr_cmds_t *asr = get_asr_cmds();
-  // robot->magazine_switch_flag = MAG_OFF; // 遥控器下不断控关闭弹舱盖
-  // robot->magazine_switch_flag = MAG_ON; // debug
   // 获取输入值
-  rocker_rx += CLAMP((float)rc_recv->rc.ch1 * T_ACC_CNT / 660.0f - rocker_rx,
+  rocker_rx += CLAMP((float)(rc_recv->ch2-992) * T_ACC_CNT / 1600.f - rocker_rx,
                      S_CURVE_RX_ACC);
-  rocker_ry += CLAMP((float)rc_recv->rc.ch0 * T_ACC_CNT / 660.0f - rocker_ry,
+  rocker_ry += CLAMP((float)(rc_recv->ch1-992) * T_ACC_CNT / 1600.f - rocker_ry,
                      S_CURVE_RY_ACC);
-  rocker_lx = -((float)rc_recv->rc.ch3 * GAIN_RC_X / 660);
-  rocker_ly = -((float)rc_recv->rc.ch2 * GAIN_RC_Y / 660);
-  static bool is_switch_change = false;
-  if (rc_recv->rc.switch_left != rc_recv->rc.last_switch_left)
-    is_switch_change = true;
-  else
-    is_switch_change = false;
-  if (robot->robot_basic_mode == NORMAL_MODE) {
-    robot->use_supercap_flag = 0;
-    /*  ↓↓↓左侧钮子开关控制开火↓↓↓    */
-    if (robot->chassis_tag != C_DEFAULT_MODE)
-      update_chassis_tag(robot, C_DEFAULT_MODE);
+  rocker_lx = -((float)(rc_recv->ch3-992) * GAIN_RC_X / 1600.f);
+  rocker_ly = -((float)(rc_recv->ch4-992) * GAIN_RC_Y / 1600.f);
 
-    if (rc_recv->rc.switch_left == RC_SW_DOWN) {
-      robot->use_vision_flag = DISABLE;
-      robot->fire_flag = DISABLE;
-      robot->use_fric_flag = DISABLE;
-      update_tag(robot, INVALID_TAG, INVALID_TAG, S_STOP_MODE);
-      if (robot->shooter_tag != robot->shooter_tag_last && is_switch_change) {
-        asr_shooter_stop_cmd();
-      }
-    } else if (rc_recv->rc.switch_left == RC_SW_MID) {
-      robot->use_vision_flag = ENABLE; // 遥控器下打弹时自瞄常驻
-      robot->use_fric_flag = ENABLE;
-      update_tag(robot, INVALID_TAG, INVALID_TAG, S_RESTRICT_MODE);
-      if (robot->shooter_tag != robot->shooter_tag_last && is_switch_change) {
-        asr_shooter_start_cmd();
-      }
-#if USE_DT7_WHEEL
-      if (abs(rc_recv->wheel - 1024) > 50) {
-        robot->fire_flag = ENABLE;
-      } else {
-        robot->fire_flag = DISABLE;
-      }
-
-#else
-      robot->fire_flag = DISABLE;
-#endif
-    } else if (rc_recv->rc.switch_left == RC_SW_UP) {
-      robot->use_vision_flag = ENABLE; // 遥控器下打弹时自瞄常驻
-      robot->use_fric_flag = ENABLE;
-#if USE_DT7_WHEEL
-      static bool restrict_lock = false;
-      robot->use_fric_flag = ENABLE;
-      update_tag(robot, INVALID_TAG, INVALID_TAG, S_SINGLE_MODE);
-      if (robot->shooter_tag != robot->shooter_tag_last && is_switch_change) {
-        asr_shooter_start_cmd();
-      }
-      if (abs(rc_recv->wheel - 1024) > 400) {
-        if (!restrict_lock) {
-          robot->fire_flag = ENABLE;
-          restrict_lock = true;
-        }
-        // else robot->fire_flag = DISABLE;
-      } else {
-        robot->fire_flag = DISABLE;
-        restrict_lock = false; // 解除限制
-      }
-#else
-      robot->fire_flag = ENABLE;
-#endif
-    }
-    /*  ↑↑↑左侧钮子开关控制开火↑↑↑    */
-  }
-  // ↓感觉写的有点bug
-  else if (robot->robot_basic_mode == SEMIAUTO_MODE) {
-    robot->use_supercap_flag = 1;
+  robot->use_supercap_flag = 0;
+	
+	if (rc_recv->ch8 == 192)
+		update_chassis_tag(robot, C_FOLLOW_MODE);
+	else if (rc_recv->ch8 == 992)
+		update_chassis_tag(robot, C_TANK_MODE);
+	else if (rc_recv->ch8 == 1792)
+		update_chassis_tag(robot, C_SPIN_MODE);	
+	
+	
+  if (rc_recv->ch6 == 192) {
+    robot->use_vision_flag = DISABLE;
     robot->fire_flag = DISABLE;
     robot->use_fric_flag = DISABLE;
-    if (rc_recv->rc.switch_left == RC_SW_DOWN) {
-      update_tag(robot, C_TANK_MODE, G_DEFAULT_MODE, INVALID_TAG);
-    } else if (rc_recv->rc.switch_left == RC_SW_MID) {
-      // 正反陀螺供检录用
-      if (rc_recv->rc.last_switch_left == RC_SW_DOWN)
-        spin_direction = -spin_direction;
-      update_tag(robot, C_SPIN_MODE, G_MANUAL_MODE, INVALID_TAG);
-    } else if (rc_recv->rc.switch_left == RC_SW_UP) {
-      // 此处根据导航提供的数据更新TAG
-      nav_ctrl_t *nav = get_nav_ctrl_data_ptr();
-      if (!nav->header) {
-        // 导航掉线
-        update_tag(robot, C_SPIN_MODE, G_PATROL_MODE, S_STOP_MODE);
-      } else {
-        // TODO
-      }
-    }
-  } else if (robot->robot_basic_mode == AUTO_MODE) {
-    // 全自动模式
-    // 格了
-  }
+    update_tag(robot, INVALID_TAG, INVALID_TAG, S_STOP_MODE);
+
+  } else if (rc_recv->ch6 == 256) {
+    robot->use_vision_flag = ENABLE; // 遥控器下打弹时自瞄常驻
+    robot->use_fric_flag = ENABLE;
+    update_tag(robot, INVALID_TAG, INVALID_TAG, S_RESTRICT_MODE);
+
+    if (rc_recv->ch5 == 1792) { // 打弹
+      robot->fire_flag = ENABLE;
+    } else {
+      robot->fire_flag = DISABLE;
+   }	 
+ }
 }
 
 /**
@@ -561,15 +644,13 @@ void motor_switch(uint8_t switch_flag) {
  * @param robot 机器人结构体指针
  * @retval None
  */
-void behaviour_ctrl_loop(rc_ctrl_t *rc_recv, robot_t *robot) {
+void ht10a_behaviour_ctrl_loop(ht10a_ctrl_t *rc_recv, robot_t *robot) {
   asr_cmds_t *asr = get_asr_cmds();
   select_rc_sc(robot);                     // 选择控制源
   killed_protect(robot);                   // 阵亡检测
   select_control_flag(rc_recv, robot);     // 控制机器人上下控
-  select_robot_basic_mode(rc_recv, robot); // 选择机器人基本模式
-
-  if (rc_recv->keyboard.last_keycode != 0 && robot->rc_sc != BOARDS_CONTROLLER)
-    robot->keyboard_flag = ENABLE; // 按过键盘后就不能用遥控器的摇杆控了
+  //select_robot_basic_mode(rc_recv, robot); // 选择机器人基本模式
+	robot->robot_basic_mode = NORMAL_MODE;
 
   if (robot->robot_control_flag == ENABLE) {
     if (robot->rc_sc == BOARDS_CONTROLLER) {
@@ -581,10 +662,7 @@ void behaviour_ctrl_loop(rc_ctrl_t *rc_recv, robot_t *robot) {
     } else {
       if (robot->reset_flag == FINISH) {
         if (robot->rc_sc == DT7_CONTROLLER || robot->rc_sc == VT_CONTROLLER) {
-          if (robot->keyboard_flag == ENABLE) // 使用键鼠
-            update_robot_status_for_keyboard(rc_recv, robot);
-          else /*(robot->keyboard_flag == DISABLE*/ // 使用遥控器
-            update_robot_status_for_remoteControl(rc_recv, robot);
+          update_robot_status_for_ht10a(rc_recv, robot); // 遥控器数据处理
         }
       } else /*(robot->reset_flag == UNFINISH)*/ {
 // 云台与底盘的握手机制 云台先缓启动 然后轮到底盘缓启动
@@ -618,7 +696,7 @@ void behaviour_ctrl_loop(rc_ctrl_t *rc_recv, robot_t *robot) {
     robot->rush_flag = DISABLE;
 
     // robot->magazine_switch_flag = UNCONTROL;
-    if (rc_recv->rc.switch_left == RC_SW_MID)
+    if (rc_recv->ch11 < 124)
       robot->magazine_switch_flag = MAG_ON;
     else
       robot->magazine_switch_flag = MAG_OFF;
@@ -630,6 +708,76 @@ void behaviour_ctrl_loop(rc_ctrl_t *rc_recv, robot_t *robot) {
     // shutdown_all_motor(); //为了减轻can负载 放在motor_switch关电机
   }
 }
+
+//void behaviour_ctrl_loop(rc_ctrl_t *rc_recv, robot_t *robot) {
+//  asr_cmds_t *asr = get_asr_cmds();
+//  select_rc_sc(robot);                     // 选择控制源
+//  killed_protect(robot);                   // 阵亡检测
+//  select_control_flag(rc_recv, robot);     // 控制机器人上下控
+//  select_robot_basic_mode(rc_recv, robot); // 选择机器人基本模式
+
+//  if (rc_recv->keyboard.last_keycode != 0 && robot->rc_sc != BOARDS_CONTROLLER)
+//    robot->keyboard_flag = ENABLE; // 按过键盘后就不能用遥控器的摇杆控了
+
+//  if (robot->robot_control_flag == ENABLE) {
+//    if (robot->rc_sc == BOARDS_CONTROLLER) {
+//      if (is_gimbal_reseted() && is_chassis_reseted()) {
+//        robot->reset_flag = FINISH;
+//      } else
+//        robot->reset_flag = UNFINISH;
+//      ; // 若为板间控制且当前板为从机 则不主动改变behaviour内容
+//    } else {
+//      if (robot->reset_flag == FINISH) {
+//        if (robot->rc_sc == DT7_CONTROLLER || robot->rc_sc == VT_CONTROLLER) {
+//          if (robot->keyboard_flag == ENABLE) // 使用键鼠
+//            update_robot_status_for_keyboard(rc_recv, robot);
+//          else /*(robot->keyboard_flag == DISABLE*/ // 使用遥控器
+//            update_robot_status_for_remoteControl(rc_recv, robot);
+//        }
+//      } else /*(robot->reset_flag == UNFINISH)*/ {
+//// 云台与底盘的握手机制 云台先缓启动 然后轮到底盘缓启动
+//// 都缓启动完成后传输完成标志位 并将reset flag = FINISH
+//// 没初始化完不允许发射,若需要,可关闭USE_ROBOT_RESETING_SHOOTER_PROTECTION
+//#if USE_ROBOT_RESETING_SHOOTER_PROTECTION
+//        shooter_tag_t temp_tag = S_STOP_MODE;
+//#else
+//        shooter_tag_t temp_tag = INVALID_TAG;
+//#endif
+//        if (is_gimbal_reseted()) {
+//          update_tag(robot, C_LAUNCH_MODE, G_DEFAULT_MODE, temp_tag);
+//          if (is_chassis_reseted()) {
+//            update_tag(robot, C_DEFAULT_MODE, INVALID_TAG, temp_tag);
+//            robot->reset_flag = FINISH;
+//          } else
+//            update_tag(robot, C_LAUNCH_MODE, INVALID_TAG, temp_tag);
+//        } else
+//          update_tag(robot, C_STOP_MODE, G_LAUNCH_MODE, temp_tag);
+//      }
+//    }
+//  } else /*(robot->robot_control_flag == DISABLE)*/ {
+//    robot->reset_flag = UNFINISH;
+//    robot->robot_basic_mode = NORMAL_MODE;
+
+//    robot->use_fric_flag = DISABLE;
+//    robot->use_supercap_flag = DISABLE;
+//    robot->use_vision_flag = DISABLE;
+
+//    robot->fire_flag = DISABLE;
+//    robot->rush_flag = DISABLE;
+
+//    // robot->magazine_switch_flag = UNCONTROL;
+//    if (rc_recv->rc.switch_left == RC_SW_MID)
+//      robot->magazine_switch_flag = MAG_ON;
+//    else
+//      robot->magazine_switch_flag = MAG_OFF;
+
+//    update_tag(robot, C_STOP_MODE, G_STOP_MODE, S_STOP_MODE);
+
+//    need_change_yaw_center = 0;
+
+//    // shutdown_all_motor(); //为了减轻can负载 放在motor_switch关电机
+//  }
+//}
 
 /**
  * @brief 补弹机构控制函数

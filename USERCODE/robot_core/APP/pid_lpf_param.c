@@ -25,21 +25,21 @@ const pid_struct_t wheels_pid_isolated_init_val = {
 };
 
 const pid_struct_t chassis_vx_pid_init_val = {
-    .kp = 1.0f,
+    .kp = 3.0f,
     .ki = 10.0f,
     .kd = 0.0f,
     .i_max = 0.01f,
-    .out_max = 0.1f,
+    .out_max = 3.f,
     .k_deadband = 0.005f,
     .dt = 1.f / CHASSIS_TIM_FREQ,
 };
 
 const pid_struct_t chassis_vy_pid_init_val = {
-    .kp = 1.0f,
+    .kp = 3.0f,
     .ki = 10.0f,
     .kd = 0.0f,
     .i_max = 0.01f,
-    .out_max = 0.1f,
+    .out_max = 3.f,
     .k_deadband = 0.005f,
     .dt = 1.f / CHASSIS_TIM_FREQ,
 };
@@ -54,12 +54,12 @@ const pid_struct_t chassis_wz_pid_init_val = {
 };
 
 const pid_struct_t chassis_follow_pid_init_val = {
-    .kp = 0.0035f,
+    .kp = 0.008f,
     .ki = 0.0f,
     .kd = 0.0005f,
     .i_max = 1,
     .out_max = 5, // 15,
-    .k_deadband = 175.0f,
+    .k_deadband = 5.0f,
     .deadband_zero_output = 1,
     .dt = 1.f / CHASSIS_TIM_FREQ,
 };

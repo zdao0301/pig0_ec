@@ -10,6 +10,7 @@
 #include "main.h"
 #include "stm32f407xx.h"
 #include "system_stm32f4xx.h"
+#include "spi.h"
 
 /*机器人变量*/
 robot_t robot = {0};
@@ -19,6 +20,7 @@ imu_data_t gimbal_imu_data = {0};
 imu_data_t chassis_imu_data = {0};
 
 rc_ctrl_t *rc_recv = NULL;
+ht10a_ctrl_t *ht10a_rc_recv = NULL;
 
 uint32_t now_timestamp = 0;
 
@@ -70,13 +72,13 @@ static int8_t imu_init(void) {
 static void beep_start_show(void) {
   beep(1, 1, 600);
   for (uint8_t i = 0; i < 3; i++) {
-    buzzer_proc();
+    //buzzer_proc();
     ROBOT_DELAY_MS(100);
   }
   ROBOT_DELAY_MS(100);
   beep(1, 2, 400);
   for (uint8_t i = 0; i < 4; i++) {
-    buzzer_proc();
+    //buzzer_proc();
     ROBOT_DELAY_MS(100);
   }
   ROBOT_DELAY_MS(100);
@@ -143,12 +145,14 @@ void robot_init(void) {
  */
 void diag_slow_time_cycle(void) {
   robot_bus_detect();
+	//COMPO_SPI_receive();//器件spi接收
+
 #if defined(STM32H723xx)
   RGB_loop(10, 0.5, 1);
 #elif defined(STM32F407xx)
   RGB_loop(10, 0.5);
 #endif
-  buzzer_proc();
+  //buzzer_proc();
 }
 
 /**
@@ -157,9 +161,14 @@ void diag_slow_time_cycle(void) {
  * @retval None
  */
 void robot_m_tim_cycle(void) {
-  rc_recv = get_rc_data_ptr();
-  behaviour_ctrl_loop(rc_recv, &robot);
+//  rc_recv = get_rc_data_ptr();
+//	behaviour_ctrl_loop(rc_recv, &robot);
+	
+	ht10a_rc_recv = get_ht10a_data_ptr();
+	ht10a_behaviour_ctrl_loop(ht10a_rc_recv, &robot);
 
+//	COMPO_SPI_receive(compo_r, compo_t);//器件spi接收
+	
   robot_test_loop();
 
   robot_shooter_ctrl();
@@ -179,8 +188,13 @@ void robot_m_tim_cycle(void) {
  * @retval None
  */
 void robot_h_tim_cycle(void) {
-  rc_recv = get_rc_data_ptr();
-  behaviour_ctrl_loop(rc_recv, &robot);
+//  rc_recv = get_rc_data_ptr();
+//  behaviour_ctrl_loop(rc_recv, &robot);
+	
+	ht10a_rc_recv = get_ht10a_data_ptr();
+	ht10a_behaviour_ctrl_loop(ht10a_rc_recv, &robot);
+	
+	COMPO_SPI_receive();
 
   robot_gimbal_ctrl();
 
@@ -232,7 +246,7 @@ void robot_state_update(void) {
   rc_recv = get_rc_data_ptr();
 #endif
 
-  behaviour_ctrl_loop(rc_recv, &robot);
+  //behaviour_ctrl_loop(rc_recv, &robot);
 
 #if OS_ENABLE
   if (xSemaphoreTake(xMutex_rc_update, portMAX_DELAY) == pdTRUE) {

@@ -223,7 +223,8 @@ HAL_StatusTypeDef shooter17_ctrl_loop(float dt, robot_t *robot) {
   cur_dial_rpm = iir_filter_3(motors->dial.real.rpm / DIAL_RR, 10);
   cur_dial_ang = motors->dial.real.abs_angle;
 
-  rc_ctrl_t *dt7_data = get_dt7_data_ptr();
+  //rc_ctrl_t *dt7_data = get_dt7_data_ptr();
+	ht10a_ctrl_t *ht10a_data = get_ht10a_data_ptr();
 
   remaining_heat = game_robot_status.shooter_barrel_heat_limit -
                    power_heat_data.shooter_id1_17mm_cooling_heat;
@@ -234,19 +235,19 @@ HAL_StatusTypeDef shooter17_ctrl_loop(float dt, robot_t *robot) {
   else
     heat_enable_flag = DISABLE;
 
-  // 控制期望弹速
-  if (dt7_data) // 防wheel编码器损坏为0
-    dial_cnt +=
-        CLAMP((float)(dt7_data->wheel - 1024) * T_ACC_CNT / 660.0f - dial_cnt,
-              S_CURVE_DIAL_ACC);
-#if USE_DT7_WHEEL
-  if (robot->keyboard_flag)
-    exp_dial_rpm = -DIAL_RPM;
-  else
-    exp_dial_rpm = -fabsf(s_curve(DIAL_RPM, dial_cnt));
-#else
+//  // 控制期望弹速
+//  if (ht10a_data) // 防wheel编码器损坏为0
+//    dial_cnt +=
+//        CLAMP((float)(ht10a_data->ch5 - 1024) * T_ACC_CNT / 660.0f - dial_cnt,
+//              S_CURVE_DIAL_ACC);
+//#if USE_DT7_WHEEL
+//  if (robot->keyboard_flag)
+//    exp_dial_rpm = -DIAL_RPM;
+//  else
+//    exp_dial_rpm = -fabsf(s_curve(DIAL_RPM, dial_cnt));
+//#else
   exp_dial_rpm = -DIAL_RPM;
-#endif
+//#endif
 #if (BOARDS_MODE && MACHINE_TYPE == CHASSIS_SLAVE) || !BOARDS_MODE
   if (remaining_heat > MIN_SHOOT_HEAT * 1.7f ||
       game_robot_status.shooter_barrel_heat_limit == 0xFFFF)

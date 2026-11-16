@@ -138,6 +138,7 @@ extern int8_t spin_direction;
 
 void behaviour_init(robot_t *state);
 void behaviour_ctrl_loop(rc_ctrl_t *rc_recv, robot_t *state);
+void ht10a_behaviour_ctrl_loop(ht10a_ctrl_t *rc_recv, robot_t *state);
 
 void motor_switch(uint8_t switch_flag);
 

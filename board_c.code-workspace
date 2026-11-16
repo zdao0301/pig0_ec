@@ -74,5 +74,10 @@
 		"editor.formatOnPaste": true,
 		"editor.formatOnSave": true,
 		"editor.formatOnType": true
+	},
+	"extensions": {
+		"recommendations": [
+			"openai.chatgpt"
+		]
 	}
 }

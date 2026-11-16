@@ -37,14 +37,14 @@ extern SPI_HandleTypeDef hspi1;
 extern SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN Private defines */
-
+extern uint8_t compo_r[4], compo_t[4];
 /* USER CODE END Private defines */
 
 void MX_SPI1_Init(void);
 void MX_SPI2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+void COMPO_SPI_receive(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

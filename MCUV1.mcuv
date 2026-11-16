@@ -1,0 +1,157 @@
+{
+  "format": "mcuviewer-project",
+  "schema_version": 3,
+  "app_version": "1.4.0",
+  "id": "33c5adb2-5e1b-4668-8c21-6a294c35b912",
+  "elf": {
+    "path": "MDK-ARM/board_c/board_c.elf"
+  },
+  "viewer": {
+    "viewport_width_ms": 5000.0
+  },
+  "trace": {
+    "channels": [
+      {
+        "name": "CH0"
+      },
+      {
+        "name": "CH1"
+      },
+      {
+        "name": "CH2"
+      },
+      {
+        "name": "CH3"
+      },
+      {
+        "name": "CH4"
+      },
+      {
+        "name": "CH5"
+      },
+      {
+        "name": "CH6"
+      },
+      {
+        "name": "CH7"
+      },
+      {
+        "name": "CH8"
+      },
+      {
+        "name": "CH9"
+      }
+    ]
+  },
+  "variables": [
+    {
+      "name": "an1_cs",
+      "tracked_name": "an1",
+      "address": "0x1000000F",
+      "type": "u8",
+      "color": "#E77F228D"
+    },
+    {
+      "name": "an2_clk",
+      "tracked_name": "an2",
+      "address": "0x10000010",
+      "type": "u8",
+      "color": "#5F184270"
+    },
+    {
+      "name": "an3_mi",
+      "tracked_name": "an3",
+      "address": "0x10000011",
+      "type": "u8",
+      "color": "#B8E0243E"
+    },
+    {
+      "name": "an4_mo",
+      "tracked_name": "an4",
+      "address": "0x10000012",
+      "type": "u8",
+      "color": "#FF65B951"
+    },
+    {
+      "name": "compo_r[0]",
+      "address": "0x20000008",
+      "type": "u8",
+      "color": "#0906D9FB"
+    },
+    {
+      "name": "compo_r[1]",
+      "address": "0x20000009",
+      "type": "u8",
+      "color": "#F60A12DF"
+    },
+    {
+      "name": "compo_r[2]",
+      "address": "0x2000000A",
+      "type": "u8",
+      "color": "#79D72283"
+    },
+    {
+      "name": "compo_r[3]",
+      "address": "0x2000000B",
+      "type": "u8",
+      "color": "#8F699199"
+    },
+    {
+      "name": "spi_finish_flag",
+      "address": "0x1000000E",
+      "type": "u8",
+      "color": "#965FE3B0"
+    }
+  ],
+  "groups": [
+    {
+      "name": "new sampling group",
+      "plots": [
+        {
+          "name": "new plot",
+          "y_axis": {
+            "autofit_on_start": false,
+            "autofit_viewport": true
+          },
+          "series": [
+            {
+              "variable": "an1_cs",
+              "visible": false
+            },
+            {
+              "variable": "an2_clk"
+            },
+            {
+              "variable": "an3_mi",
+              "visible": false
+            },
+            {
+              "variable": "an4_mo",
+              "visible": false
+            },
+            {
+              "variable": "compo_r[0]",
+              "visible": false
+            },
+            {
+              "variable": "compo_r[1]",
+              "visible": false
+            },
+            {
+              "variable": "compo_r[2]",
+              "visible": false
+            },
+            {
+              "variable": "compo_r[3]",
+              "visible": false
+            },
+            {
+              "variable": "spi_finish_flag",
+              "visible": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -42,7 +42,7 @@
 // 临桂县25℃ 6150为25m/s
 // 临桂县25℃ 6000为23m/s
 // 临桂县23℃ 6400为22m/s
-#define FRIC_RPM 6000.f
+#define FRIC_RPM 6000.f//6000
 // (DEFAULT_SHOOT_SPEED / C_FRIC * 60.f) // 不带减速箱的rpm
 #define FRIC_TEST_RPM 2000.f
 

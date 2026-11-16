@@ -131,7 +131,6 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
-
   /*Be sure to place MX_DMA_Init() before MX_USARTx_UART_Init()*/
 
 //  __HAL_TIM_DISABLE_IT(&M_TIM_HANDLE,TIM_IT_UPDATE);
@@ -266,7 +265,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 0 */
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM2) {
+  if (htim->Instance == TIM2)
+  {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
@@ -305,8 +305,7 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.
